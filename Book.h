@@ -15,7 +15,7 @@ enum class Side
 struct Order
 {
     uint64_t id; // unique identifier for order
-    double price;
+    uint64_t price;
     uint32_t quantity;
     Side side;
 };
