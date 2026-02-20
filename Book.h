@@ -4,6 +4,7 @@
 #include <deque>
 #include <functional>
 #include <unordered_map>
+#include <variant>
 
 enum class Side
 {
@@ -46,9 +47,9 @@ public:
     //   -remove id from index
     CancelResult cancelOrder(uint64_t id);
 
-    std::optional<double> getBestBid() const;                 // if book is empty, return optional
-    std::optional<double> getBestAsk() const;                 // if book is empty, return optional
-    uint32_t getVolumeAtPrice(Side side, double price) const; // get market depth
+    std::optional<uint64_t> getBestBid() const;                 // if book is empty, return optional
+    std::optional<uint64_t> getBestAsk() const;                 // if book is empty, return optional
+    uint32_t getVolumeAtPrice(Side side, uint64_t price) const; // get market depth
 
 private:
     uint64_t nextSequence_ = 0; // represents next sequence number that will be assigned (internal counter)
@@ -62,14 +63,13 @@ private:
     // Type aliases to avoid comparator type mismatch
 
     // Maps: enforces price ordering -> FIFO within each price
-    using BidMap = std::map<double, std::deque<InternalOrder>, std::greater<double>>;
-    using AskMap = std::map<double, std::deque<InternalOrder>>;
+    using BidMap = std::map<uint64_t, std::deque<InternalOrder>, std::greater<uint64_t>>;
+    using AskMap = std::map<uint64_t, std::deque<InternalOrder>>;
 
     struct OrderLocation
     {
-        Side side;
-        BidMap::iterator bidPriceIt;
-        AskMap::iterator askPriceIt;
+        Side side; // buy/sell
+        std::variant<BidMap::iterator, AskMap::iterator> priceLevelIt;
         std::deque<InternalOrder>::iterator orderIt;
     };
 
